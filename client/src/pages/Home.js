@@ -1,30 +1,25 @@
+// Home.jsx
+
 import { useContext, useEffect } from 'react';
-import NavBar from '../components/NavBar'
+import NavBar from '../components/NavBar';
 import { Conetxt } from '../context/Context';
+import { Button } from 'react-bootstrap';
+import { useNavigate } from 'react-router-dom';
 
 const Home = () => {
-    const { sendEmergencyAlert, socket } = useContext(Conetxt)
-    useEffect(() => {
-        console.log("sending alert");
-        sendEmergencyAlert({
-            "name": "test",
-            "email": "test",
-            "contact": 8696074241,
-            "longitude": 72.877655,
-            "latitude": 19.075983
-        })
-    }, [socket])
+    const nav = useNavigate()
+    const { sendEmergencyAlert, socket } = useContext(Conetxt);
+
     return (
         <>
-            <button onClick={() => sendEmergencyAlert({
-                "name": "test",
-                "email": "test",
-                "contact": 8696074241,
-                "longitude": 72.877655,
-                "latitude": 19.075983
-            })}>Click</button>
+            <div className='home-bg'>
+                    <div className='home-title '>CodeCopter</div>
+                <div className="">
+                    <button onClick={()=>nav('/emergency')}className='emergency-button'>Emergency</button>
+                </div>
+            </div>
         </>
     );
-}
+};
 
 export default Home;

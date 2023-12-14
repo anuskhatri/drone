@@ -7,10 +7,10 @@ const NavBar=()=> {
     return (
         <Navbar bg="dark" data-bs-theme="dark">
             <Container>
-                <Navbar.Brand href="#home">CodeCopter</Navbar.Brand>
+                <Navbar.Brand href="/">CodeCopter</Navbar.Brand>
                 <Nav className="me-auto">
                     <Nav.Link href="/emergency">Emergency</Nav.Link>
-                    <Nav.Link href="/disaster_details">Disaster Deatils</Nav.Link>
+                    {/* <Nav.Link href="/disaster_details">Disaster Deatils</Nav.Link> */}
                 </Nav>
             </Container>
         </Navbar>

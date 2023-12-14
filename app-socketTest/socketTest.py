@@ -27,7 +27,7 @@ def servermessage(data):
 def disconnect():
     print('Disconnected from server')
 
-sio.connect(' https://056c-202-134-156-154.ngrok-free.app')
+sio.connect('http://localhost:5000')
 
 # Perform actions after connecting
 # emit_alert_after_delay()

@@ -1,4 +1,5 @@
 import React, { useContext, useState } from 'react';
+import dronImage from '../asset/medicineDeliveryDrone.png'
 import {
   MDBBtn,
   MDBContainer,
@@ -11,9 +12,11 @@ import {
   MDBIcon,
   MDBCheckbox
 } from 'mdb-react-ui-kit';
+import { Button } from 'react-bootstrap';
 import { Conetxt } from '../context/Context';
+import { useNavigate } from 'react-router-dom';
 
-function Emergency() {
+const Emergency=()=> {
   const { sendEmergencyAlert, alertError } = useContext(Conetxt);
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
@@ -23,6 +26,7 @@ function Emergency() {
   const [latitude, setLatitude] = useState(null);
   const [longitude, setLongitude] = useState(null);
   const [alertSent, setAlertSent] = useState(null)
+  const nav = useNavigate()
   const handleRegister = async () => {
     // Validate all fields are filled
     if (!name || !email || !number || (!useMyLocation && !location)) {
@@ -63,7 +67,8 @@ function Emergency() {
 
         setLocation(userLocation);
         console.log('Using user location:', userLocation);
-      } else if (!useMyLocation) {
+      }
+      else if (!useMyLocation) {
         // Use Nominatim for geocoding without an API key
         const response = await fetch(
           `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(location)}`
@@ -102,8 +107,11 @@ function Emergency() {
       };
 
       // Call the sendEmergencyAlert function with the alertData, latitude, and longitude
-      setAlertSent(sendEmergencyAlert(alertData))
+     setAlertSent(sendEmergencyAlert(alertData))
 
+     alert('Alert sent ')
+     nav('/')
+      
       // Optionally, you can reset the form fields after successful submission
       setName('');
       setEmail('');
@@ -112,23 +120,17 @@ function Emergency() {
       setUseMyLocation(false);
       setLatitude(null);
       setLongitude(null);
-    } catch (error) {
+    } 
+    catch (error) {
       console.error('Error during registration:', error.message);
       alert('An error occurred during registration.');
     }
   };
 
-  if (alertSent && !alertError) {
-    return <>
-    <div >
-      Alert Sent
 
-    </div>
-    </>
-  }
-  else if (alertError) {
-    
-    return <> Something went wrong try again later</>
+  if (alertError) {
+
+    return <> <div className='error'>Something went wrong try again later</div></>
   }
   return (
     <MDBContainer fluid>
@@ -136,12 +138,12 @@ function Emergency() {
         <MDBCardBody>
           <MDBRow>
             <MDBCol md='10' lg='6' className='order-2 order-lg-1 d-flex flex-column align-items-center'>
-              <p className="text-center h1 fw-bold mb-5 mx-1 mx-md-4 mt-4">Sign up</p>
+              <p className="text-center h1 fw-bold mb-5 mx-1 mx-md-4 mt-4" style={{ color: '#ff5555' }}>Emergency</p>
 
               <div className="d-flex flex-row align-items-center mb-4 ">
                 <MDBIcon fas icon="user me-3" size='lg' />
                 <MDBInput
-                  label='Your Name'
+                  label='Name'
                   id='form1'
                   type='text'
                   className='w-100'
@@ -153,7 +155,7 @@ function Emergency() {
               <div className="d-flex flex-row align-items-center mb-4">
                 <MDBIcon fas icon="envelope me-3" size='lg' />
                 <MDBInput
-                  label='Your Email'
+                  label='Email'
                   id='form2'
                   type='email'
                   value={email}
@@ -164,7 +166,7 @@ function Emergency() {
               <div className="d-flex flex-row align-items-center mb-4">
                 <MDBIcon fas icon="lock me-3" size='lg' />
                 <MDBInput
-                  label='Your Number'
+                  label='Number'
                   id='form3'
                   type='text'
                   value={number}
@@ -176,7 +178,7 @@ function Emergency() {
                 <div className="d-flex flex-row align-items-center mb-4">
                   <MDBIcon fas icon="key me-3" size='lg' />
                   <MDBInput
-                    label='Your Location'
+                    label='Location'
                     id='form4'
                     type='text'
                     value={location}
@@ -196,13 +198,11 @@ function Emergency() {
                 />
               </div>
 
-              <MDBBtn style={{ maxHeight: '8%', maxWidth: "15%", height: '8%' }} className='mb-4' size='lg' onClick={handleRegister}>
-                Submit
-              </MDBBtn>
+              <Button variant="primary" onClick={handleRegister}>Submit</Button>
             </MDBCol>
 
             <MDBCol md='10' lg='6' className='order-1 order-lg-2 d-flex align-items-center'>
-              <MDBCardImage src='https://mdbcdn.b-cdn.net/img/Photos/new-templates/bootstrap-registration/draw1.webp' fluid />
+              <MDBCardImage src={dronImage} fluid />
             </MDBCol>
           </MDBRow>
         </MDBCardBody>
