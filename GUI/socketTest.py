@@ -1,41 +1,55 @@
 import socketio
 import time
 
-sio = socketio.Client()
+class MySocketIOClient:
+    def __init__(self, server_url):
+        self.sio = socketio.Client()
+        self.server_url = server_url
 
-def alert_received(data):
-    print(f"Value of key1: {data}")
-    return data
+        # Register event handlers
+        self.conn = None
+        self.data= None
+        self.sio.on('*', self.catch_all)
+        self.sio.event(self.connect)
+        self.sio.event(self.disconnect)
+        self.sio.event(self.servermessage)
+        t1=self.sio.event(self.alert)
+        print(t1)
+
+
+    def connect(self):
+        print('Connected to server')
+
+    def catch_all(self, event, data):
+        print(f'Received event: "{event}" with data: {data}')
+        # Add your custom logic here based on the received event
+
+    def alert(self, data):
+        self.data= data
+        #print(f'Received alert: {self.data}')
+        self.conn =True
     
-@sio.event
-def connect():
-    print('Connected to server')
 
-@sio.on('*')
-def catch_all(event, data):
-    print(f'Received event: "{event}" with data: {data}')
-    # Add your custom logic here based on the received event
+    def servermessage(self, data):
+        print(data)
 
-@sio.event
-def alert(data):
-    print(f'Received alert: {data}')
+    def disconnect(self):
+        print('Disconnected from server')
+
+    def start(self):
+        self.sio.connect(self.server_url)
+    def reset_alert_data(self):
+        self.data =None
+
+    def return_data(self):
+        return self.data
     
-@sio.event
-def servermessage(data):
-    print(data)
-    
-@sio.event
-def disconnect():
-    print('Disconnected from server')
 
-sio.connect('http://localhost:5000')
+        # Perform actions after connecting
+        # self.emit_alert_after_delay()
 
-# Perform actions after connecting
-# emit_alert_after_delay()
+        # Keep the script running
 
-# Keep the script running
-try:
-    while True:
-        pass
-except KeyboardInterrupt:
-    sio.disconnect()
+
+
+# Example usage:

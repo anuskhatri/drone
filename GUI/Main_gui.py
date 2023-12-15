@@ -10,18 +10,22 @@ import cv2
 import cvzone
 import math
 import pygame
+import webbrowser 
+import serial.tools.list_ports
+from geopy.geocoders import Nominatim
 from flight_operation import DroneController
-from CTkMessagebox import CTkMessagebox 
-
+from CTkMessagebox import CTkMessagebox  
 
 class Pop_up:
-    def error(self,error):
-        print(error)
-        self.msg=ctkmessagebox = CTkMessagebox( title='Error', message=f'Something went Wrong ! \\nError:{error}', fade_in_duration=100, option_1="Cancel", option_2="Retry")
+    def error(self,name, latitude  ,longitude):
+        self.msg=ctkmessagebox = CTkMessagebox( title='Alert !!', message=f'Name: {name}\nLocation: {longitude} {longitude}', fade_in_duration=100, option_1="Cancel", option_2="See in maps")
         ctkmessagebox.after(10000, ctkmessagebox.button_event)
 
-        if self.msg.get()=='Retry':
+        if self.msg.get()=='See in maps':
             ctkmessagebox.destroy()
+            google_url= f"https://www.google.com/maps/search/?api=1&query={latitude},{longitude}"
+            webbrowser.open(google_url)
+
 
         elif self.msg.get()=='Cancel':
             return False
@@ -40,10 +44,11 @@ class main_gui :
 
     def __init__(self):
 
-
+        self.p1 =Pop_up()
         self.root = ct.CTk() #object 
         self.root.title("Drone Software")
-
+        
+        
 
 #-----------------------------------------image variables--------------------------------------------
         connect_original_image = Image.open("C:\\Users\\Mr.Hetal Hakani\\Desktop\\SIH project\\drone\\GUI\\images\\connect_button.png")
@@ -91,8 +96,13 @@ class main_gui :
 
         self.connect_button = ct.CTkButton(master = self.top_frame, image= self.dis_button_img, text="", fg_color="red",hover_color="green", corner_radius=500 ,width=10 ,height=10, command=self.pixshawk_connect)  # Connect/disconnect button 
         self.connect_button.place(x=1450 , y=8) #pixshakwk button 
+        
 
-        self.arm_button = ct.CTkButton(master = self.left_frame, text="Arm")  # Connect/disconnect button 
+        self.com_port=ct.CTkComboBox(master=self.top_frame, values=["COM1", "COM2","COM3", "COM4","COM5", "COM6","COM7", "COM8","COM9", "COM10", "COM11","COM12", "COM13"], state="readonly")
+        self.com_port.set("COM1")
+        self.com_port.place(x=1250,y=10)
+
+        self.arm_button = ct.CTkButton(master = self.left_frame, text="Arm",command=self.pixshawk_arm)  # Connect/disconnect button 
         self.arm_button.place(x=20 , y=550)
 
         self.auto_land_button = ct.CTkButton(master = self.left_frame, text="Auto land")  # Connect/disconnect button 
@@ -177,6 +187,17 @@ class main_gui :
         self.net_status = ct.CTkLabel(master= self.top_frame ,text="Online", text_color="#0FFF50",font=("", 20))
         self.net_status.place(x= 20, y=12)
 
+        try:
+            from socketTest import MySocketIOClient
+            self.server_url = 'https://e812-202-134-156-254.ngrok-free.app'
+            self.my_client = MySocketIOClient(self.server_url)
+            print("conndkngkgdkndkn")
+            self.my_client.start()
+    
+            self.alert_status()
+        except Exception as e:
+            print(e)
+        
 # ----------------------------------------------Camera View-------------------------------------------------------------- #
         
         self.cap = cv2.VideoCapture(0)
@@ -205,17 +226,26 @@ class main_gui :
         self.cam_connect_button = ct.CTkButton(master = self.right_frame, image= self.dis_cam_img, text="", fg_color="red",hover_color="green", corner_radius=500 ,width=10 ,height=10, command=self.start_cam_thread)  # Connect/disconnect button 
         self.cam_connect_button.place(x=150, y=20) #camera button 
 
+
         self.empty_cam_frame = ct.CTkFrame(master = self.right_frame , fg_color="black", width= 800 ,height =450)
         self.empty_cam_frame.place(x=125 ,y=70)
 
         self.cam_status = ct.CTkLabel(master = self.empty_cam_frame , text="Camera not connected !", font=("", 18, "bold") )
         self.cam_status.place(x=300 ,y=200)
 
+        self.yolo_detect_object=ct.CTkComboBox(master=self.right_frame, values=["All","person", "car", "bus", "dog"])
+        self.yolo_detect_object.set("All")
+        self.yolo_detect_object.place(x=300,y=550)
+
         self.start_button = ct.CTkButton(self.right_frame, text="Start Detection", command=self.start_detection)
         self.start_button.place(x=100 ,y=550)
+        
 
         self.stop_button =ct.CTkButton(self.right_frame, text="Stop Detection", command=self.stop_detection)
-        self.stop_button.place(x=300 ,y =550)
+        self.stop_button.place(x=500 ,y =550)
+
+        self.drop_button =ct.CTkButton(self.right_frame, text="Drop", command=self.drop_mechanism)
+        self.drop_button.place(x=700,y =550)
 
         self.video_view = ct.CTkLabel(self.right_frame, text= "")
         self.video_view.place(x=125,y=70 )
@@ -224,7 +254,6 @@ class main_gui :
         # self.update()
         self.update_time_thread = threading.Thread(target=self.update_time)
         self.update_time_thread.start()
-
 
         self.root.mainloop()
     def start_cam_thread(self):
@@ -238,6 +267,10 @@ class main_gui :
 
     def stop_detection(self):
         self.is_detection_running = False
+
+    def drop_mechanism(self):
+        if self.drone_controller :
+            DroneController.drop_package()
 
     def camera_connect(self):
             self.cam_connect_button.destroy
@@ -261,12 +294,14 @@ class main_gui :
 
                         conf = math.ceil((box.conf[0] * 100)) / 100
                         cls = int(box.cls[0])
-
                         label = f'{conf} {self.classes[cls]}'
-                        if self.classes[cls] == 'person':
-                            print("alert")
+                        if self.yolo_detect_object == "All":
+                    
+                                cvzone.putTextRect(self.img, label, (max(0, x1), max(0, y1)))
+                        else:
+                            if self.classes[cls] == self.yolo_detect_object.get():
+                                cvzone.putTextRect(self.img, label, (max(0, x1), max(0, y1)))
 
-                        cvzone.putTextRect(self.img, label, (max(0, x1), max(0, y1)))
             
             new_width = 1000  # Adjust the width as needed
             aspect_ratio = self.img.shape[1] / self.img.shape[0]
@@ -284,11 +319,7 @@ class main_gui :
             self.video_view.image = self.img
 
             self.root.after(10, self.camera_connect)
-                
-    def start_net_thread(self):
-        # Create a new thread to run the net method
-        pass
-
+    
 #     def net(self):
 #         if netcheck.internet():
 #             self.net_status.configure(text="Online", text_color="#39FF14")
@@ -300,13 +331,19 @@ class main_gui :
 
 
     def pixshawk_connect(self):
-        
-        self.drone_controller = DroneController()
-   
-        print("connected")
-        self.connect_button.destroy()
-        self.disconnect_button = ct.CTkButton(master = self.top_frame, image= self.connect_button_img, text="", fg_color="green",hover_color="red", corner_radius=500 ,width=10 ,height=10, command=self.pixshawk_disconnect)  #main left frame 
-        self.disconnect_button.place(x=1450 , y=8)
+        try:
+            self.drone_controller = DroneController()
+
+            print("connected")
+            if self.drone_controller:
+                self.connect_button.destroy()
+                self.disconnect_button = ct.CTkButton(master = self.top_frame, image= self.connect_button_img, text="", fg_color="green",hover_color="red", corner_radius=500 ,width=10 ,height=10, command=self.pixshawk_disconnect)  #main left frame 
+                self.disconnect_button.place(x=1450 , y=8)
+                self.update_drone_values = threading.Thread(target=self.pixshawk_get_info)
+                self.update_drone_values.start()
+        except Exception as e:
+            print("exceptio in connection of sroneee",e)
+            pass
 
             # self.connect_button.configure(hover_color="red", fg_color="green" , image= self.button_img)
 
@@ -327,27 +364,58 @@ class main_gui :
             self.drone_controller.set_mode()
 
     def pixshawk_arm(self):
-        pass
+        if self.drone_controller:
+            self.drone_controller.arming()
+
 
     def pixshawk_disarm(self):
         pass
 
     def pixshawk_get_info(self):
         if self.drone_controller:
-            self.drone_info = self.drone_controller.get_vehicle_information()
-            self.altitude.configure(text= self.drone_info['attitude'] )
-            self.ground_speed.configure(text= self.drone_info['groundspeed'] )
-            self.distancewp_speed.configure(text= self.drone_info[0] )
-            self.vertical_speed.configure(text= self.drone_info[0] )
-            self.yaw.configure(text= self.drone_info[0] )
-            self.distancemav_speed.configure(text= self.drone_info[0] )
-            self.battery_value.configure(text= self.drone_info['battery'] )
-            self.signal_strength.configure(text= self.drone_info[0] )
-
+            self.drone_info = self.drone_controller.print_vehicle_info()
+            print(type(self.drone_info))
+            print(self.drone_info)
+            self.altitude.configure(text= self.drone_info[0] )
+            self.ground_speed.configure(text= self.drone_info[1] )
+            self.distancewp_speed.configure(text= self.drone_info[2] )
+            self.vertical_speed.configure(text= self.drone_info[3] )
+            self.yaw.configure(text= self.drone_info[4] )
+            self.distancemav_speed.configure(text= self.drone_info[5] )
+            self.battery_value.configure(text= self.drone_info[6] )
+            self.signal_strength.configure(text= self.drone_info[7] )
             self.altitude.after(1000, self.pixshawk_get_info)
+
+    def alert_status(self):
+        if self.my_client:
+            print("func")
+            self.data=self.my_client.return_data()
+            print("func2", self.data)
+            if self.data !=None:
+                    print(f"{self.data}")
+                    print(type(self.data))
+                    self.name = self.data.get('name')
+                    self.latitude = self.data.get('location').get('latitude')
+                    self.longitude = self.data.get('location').get('longitude')
+                    # Reverse geocoding to get human-readable location
+                    geolocator = Nominatim(user_agent="location_extractor")
+                    self.location = geolocator.reverse((self.latitude, self.longitude))
+                    print(self.location)
+                    self.p1.error(self.name , self.latitude, self.longitude)
+                    self.my_client.reset_alert_data()
+            self.altitude.after(1000, self.alert_status)
+            
 
         
 
 # mt =main_gui()
-p1 =Pop_up()
-p1.error('Vehicle not conneted')
+m1= main_gui()
+
+
+        # #combox2
+        # self.lab_port=ct.CTkLabel(master=self.frame1 ,text="Port")
+        # self.lab_port.place(x=20 ,y=80 )
+
+        # self.com_port=ct.CTkComboBox(master=self.frame1, values=["COM1", "COM2","COM3", "COM4","COM5", "COM6","COM7", "COM8"], state="readonly")
+        # self.com_port.set("COM1")
+        # self.com_port.place(x=20 ,y=110)

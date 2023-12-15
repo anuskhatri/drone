@@ -3,7 +3,7 @@ import time
 
 # Set the connection string to the USB port where Pixhawk is connected.
 # For Windows, the port should be in the format 'COMx', where x is the port number.
-connection_string = 'COM13'
+connection_string = 'COM11'
 
 # Connect to the vehicle.
 vehicle = connect(connection_string, baud=57600, wait_ready=True)
@@ -39,7 +39,7 @@ print_vehicle_info()
 vehicle.mode = VehicleMode("GUIDED")
 
 # Arm the vehicle
-vehicle.armed = True
+vehicle.armed = False
 
 # Wait for the vehicle to arm
 while not vehicle.armed:

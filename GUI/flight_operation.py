@@ -25,19 +25,17 @@ class DroneController:
         if not self.connected:
             print("Not connected to the vehicle.")
             return None
-
         data = [
-            self.vehicle.location.global_frame, 
-            self.vehicle.location.global_relative_frame, 
-            self.vehicle.location.local_frame,
-            self.vehicle.attitude, 
-            self.vehicle.velocity, 
-            self.vehicle.groundspeed, 
-            self.vehicle.airspeed, 
-            self.vehicle.battery,
-            self.vehicle.mode.name, 
-            self.vehicle.armed
-        ]
+            self.vehicle.location.global_relative_frame.alt,
+            self.vehicle.groundspeed,
+            self.vehicle.velocity,
+            self.vehicle.airspeed,
+            self.vehicle.attitude.yaw,
+            self.vehicle.velocity,
+            self.vehicle.battery.voltage,
+            self.vehicle.rangefinder.distance,
+            ]
+        print("rangefinder",self.vehicle.rangefinder)
         return data
 
     def arming(self):
