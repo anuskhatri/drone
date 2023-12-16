@@ -11,15 +11,17 @@ class DroneController:
             print(f"Connection failed: {e}")
             self.connected = False
         
-    def drop_package(self, value):
+    def drop_package(self):
         if not self.connected:
             print("Not connected to the vehicle.")
 
+        else:
+
         # Ensure the value is within the valid range (1000 to 2000)
-            value = max(1000, min(2000, value))
+           
 
         # Set the value for Channel 6
-            self.vehicle.channels.overrides['6'] = value
+            self.vehicle.channels.overrides['6'] = 1000
 
     def print_vehicle_info(self):
         if not self.connected:

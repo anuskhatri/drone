@@ -18,7 +18,7 @@ from CTkMessagebox import CTkMessagebox
 
 class Pop_up:
     def error(self,name, latitude  ,longitude):
-        self.msg=ctkmessagebox = CTkMessagebox( title='Alert !!', message=f'Name: {name}\nLocation: {longitude} {longitude}', fade_in_duration=100, option_1="Cancel", option_2="See in maps")
+        self.msg=ctkmessagebox = CTkMessagebox( title='Alert !!', message=f'Name: {name} Location: {longitude} {longitude}', fade_in_duration=100, option_1="Cancel", option_2="See in maps")
         ctkmessagebox.after(10000, ctkmessagebox.button_event)
 
         if self.msg.get()=='See in maps':
@@ -47,6 +47,17 @@ class main_gui :
         self.p1 =Pop_up()
         self.root = ct.CTk() #object 
         self.root.title("Drone Software")
+        self.ports = serial.tools.list_ports.comports()
+        self.ports_list = []
+        if not self.ports:
+            print("No COM ports detected.")
+        else:
+            print("Detected COM ports:")
+            for port in self.ports:
+                print(f"Port: {port.device} " )
+                self.ports_list.append(f'{port.device} {port.description}')
+                
+                      
         
         
 
@@ -98,7 +109,7 @@ class main_gui :
         self.connect_button.place(x=1450 , y=8) #pixshakwk button 
         
 
-        self.com_port=ct.CTkComboBox(master=self.top_frame, values=["COM1", "COM2","COM3", "COM4","COM5", "COM6","COM7", "COM8","COM9", "COM10", "COM11","COM12", "COM13"], state="readonly")
+        self.com_port=ct.CTkComboBox(master=self.top_frame, values= self.ports_list, state="readonly")
         self.com_port.set("COM1")
         self.com_port.place(x=1250,y=10)
 
@@ -189,7 +200,7 @@ class main_gui :
 
         try:
             from socketTest import MySocketIOClient
-            self.server_url = 'https://e812-202-134-156-254.ngrok-free.app'
+            self.server_url = 'https://2346-49-32-130-243.ngrok-free.app'
             self.my_client = MySocketIOClient(self.server_url)
             print("conndkngkgdkndkn")
             self.my_client.start()
@@ -223,7 +234,7 @@ class main_gui :
         self.cam_label = ct.CTkLabel(self.right_frame, text= "Camera view", font=('Helvetica', 14))
         self.cam_label.place(x=200, y= 80)
 
-        self.cam_connect_button = ct.CTkButton(master = self.right_frame, image= self.dis_cam_img, text="", fg_color="red",hover_color="green", corner_radius=500 ,width=10 ,height=10, command=self.start_cam_thread)  # Connect/disconnect button 
+        self.cam_connect_button = ct.CTkButton(master = self.right_frame, image= self.dis_cam_img, text="", fg_color="red",hover_color="green", corner_radius=500 ,width=10 ,height=10, command=self.call_threaded_cam)  # Connect/disconnect button 
         self.cam_connect_button.place(x=150, y=20) #camera button 
 
 
@@ -244,7 +255,7 @@ class main_gui :
         self.stop_button =ct.CTkButton(self.right_frame, text="Stop Detection", command=self.stop_detection)
         self.stop_button.place(x=500 ,y =550)
 
-        self.drop_button =ct.CTkButton(self.right_frame, text="Drop", command=self.drop_mechanism)
+        self.drop_button =ct.CTkButton(self.right_frame, text="Drop", command=self.pixshawk_servo)
         self.drop_button.place(x=700,y =550)
 
         self.video_view = ct.CTkLabel(self.right_frame, text= "")
@@ -256,9 +267,8 @@ class main_gui :
         self.update_time_thread.start()
 
         self.root.mainloop()
-    def start_cam_thread(self):
-        self.t1= threading.Thread(target=self.camera_connect).start()
-    
+
+        
     def stop_camera (self):
         self.t1 = None
 
@@ -268,14 +278,17 @@ class main_gui :
     def stop_detection(self):
         self.is_detection_running = False
 
-    def drop_mechanism(self):
-        if self.drone_controller :
-            DroneController.drop_package()
-
+    def call_threaded_cam(self):
+        self.cam_connect_button.destroy
+        self.cam_disconnect_button = ct.CTkButton(master = self.right_frame, image= self.dis_cam_img, text="", fg_color="red",hover_color="green", corner_radius=500 ,width=10 ,height=10, command=self.stop_camera)  # Connect/disconnect button 
+        self.cam_disconnect_button.place(x=150, y=20)
+        
+        self.c1= threading.Thread(target=self.camera_connect())
+        self.c1.start()
+        self.c1.daemon =True
+        self.c1.join()
     def camera_connect(self):
-            self.cam_connect_button.destroy
-            self.cam_disconnect_button = ct.CTkButton(master = self.right_frame, image= self.dis_cam_img, text="", fg_color="red",hover_color="green", corner_radius=500 ,width=10 ,height=10, command=self.stop_camera)  # Connect/disconnect button 
-            self.cam_disconnect_button.place(x=150, y=20)
+
             
             self.success, self.img = self.cap.read()
             result = self.model(self.img, stream=True)
@@ -294,13 +307,14 @@ class main_gui :
 
                         conf = math.ceil((box.conf[0] * 100)) / 100
                         cls = int(box.cls[0])
-                        label = f'{conf} {self.classes[cls]}'
+                        self.label = f'{conf} {self.classes[cls]}'
+                        # print(label)
                         if self.yolo_detect_object == "All":
-                    
-                                cvzone.putTextRect(self.img, label, (max(0, x1), max(0, y1)))
-                        else:
+                                self.label = f'{conf} {self.classes[cls]}'
+                        elif(self.classes[cls] == self.yolo_detect_object.get()):
                             if self.classes[cls] == self.yolo_detect_object.get():
-                                cvzone.putTextRect(self.img, label, (max(0, x1), max(0, y1)))
+                                self.label = f'{conf} {self.classes[cls]}'
+                        cvzone.putTextRect(self.img, self.label, (max(0, x1), max(0, y1)))
 
             
             new_width = 1000  # Adjust the width as needed
@@ -341,6 +355,7 @@ class main_gui :
                 self.disconnect_button.place(x=1450 , y=8)
                 self.update_drone_values = threading.Thread(target=self.pixshawk_get_info)
                 self.update_drone_values.start()
+            
         except Exception as e:
             print("exceptio in connection of sroneee",e)
             pass
@@ -375,16 +390,20 @@ class main_gui :
         if self.drone_controller:
             self.drone_info = self.drone_controller.print_vehicle_info()
             print(type(self.drone_info))
-            print(self.drone_info)
-            self.altitude.configure(text= self.drone_info[0] )
-            self.ground_speed.configure(text= self.drone_info[1] )
-            self.distancewp_speed.configure(text= self.drone_info[2] )
-            self.vertical_speed.configure(text= self.drone_info[3] )
-            self.yaw.configure(text= self.drone_info[4] )
-            self.distancemav_speed.configure(text= self.drone_info[5] )
-            self.battery_value.configure(text= self.drone_info[6] )
-            self.signal_strength.configure(text= self.drone_info[7] )
-            self.altitude.after(1000, self.pixshawk_get_info)
+            # print("done info : ",self.drone_info)
+            self.altitude.configure(text=round(self.drone_info[0], 2))
+            self.ground_speed.configure(text=round(self.drone_info[1], 2))
+            # Assuming self.drone_info[2] is a list of values to be rounded individually
+            rounded_distancewp_speed = [round(value, 2) for value in self.drone_info[2]]
+            self.distancewp_speed.configure(text=rounded_distancewp_speed)
+            self.vertical_speed.configure(text=round(self.drone_info[3], 2))
+            self.yaw.configure(text=round(self.drone_info[4], 2))
+            self.distancemav_speed.configure(text=self.drone_info[5])
+            self.battery_value.configure(text=self.drone_info[6])
+            # self.signal_strength.configure(text=round(self.drone_info[7], 2))
+            # self.altitude.after(1000, self.pixshawk_get_info)
+
+        self.altitude.after(100, self.pixshawk_get_info)
 
     def alert_status(self):
         if self.my_client:
