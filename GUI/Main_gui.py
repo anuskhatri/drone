@@ -113,7 +113,7 @@ class main_gui :
         self.com_port.set("COM1")
         self.com_port.place(x=1250,y=10)
 
-        self.arm_button = ct.CTkButton(master = self.left_frame, text="Arm",command=self.pixshawk_arm)  # Connect/disconnect button 
+        self.arm_button = ct.CTkButton(master = self.left_frame, text="Arm",command=lambda:threading.Thread(target= self.pixshawk_arm()))  # Connect/disconnect button 
         self.arm_button.place(x=20 , y=550)
 
         self.auto_land_button = ct.CTkButton(master = self.left_frame, text="Auto land")  # Connect/disconnect button 
@@ -202,7 +202,6 @@ class main_gui :
             from socketTest import MySocketIOClient
             self.server_url = 'https://2346-49-32-130-243.ngrok-free.app'
             self.my_client = MySocketIOClient(self.server_url)
-            print("conndkngkgdkndkn")
             self.my_client.start()
     
             self.alert_status()
@@ -235,7 +234,7 @@ class main_gui :
         self.cam_label.place(x=200, y= 80)
 
         self.cam_connect_button = ct.CTkButton(master = self.right_frame, image= self.dis_cam_img, text="", fg_color="red",hover_color="green", corner_radius=500 ,width=10 ,height=10, command=self.call_threaded_cam)  # Connect/disconnect button 
-        self.cam_connect_button.place(x=150, y=20) #camera button 
+        self.cam_connect_button.place(x=50, y=20) #camera button 
 
 
         self.empty_cam_frame = ct.CTkFrame(master = self.right_frame , fg_color="black", width= 800 ,height =450)
@@ -246,20 +245,19 @@ class main_gui :
 
         self.yolo_detect_object=ct.CTkComboBox(master=self.right_frame, values=["All","person", "car", "bus", "dog"])
         self.yolo_detect_object.set("All")
-        self.yolo_detect_object.place(x=300,y=550)
+        self.yolo_detect_object.place(x=350,y=20)
 
         self.start_button = ct.CTkButton(self.right_frame, text="Start Detection", command=self.start_detection)
-        self.start_button.place(x=100 ,y=550)
+        self.start_button.place(x=150 ,y=20)
         
-
         self.stop_button =ct.CTkButton(self.right_frame, text="Stop Detection", command=self.stop_detection)
-        self.stop_button.place(x=500 ,y =550)
+        self.stop_button.place(x=550,y =20)
 
         self.drop_button =ct.CTkButton(self.right_frame, text="Drop", command=self.pixshawk_servo)
-        self.drop_button.place(x=700,y =550)
+        self.drop_button.place(x=750,y =20)
 
         self.video_view = ct.CTkLabel(self.right_frame, text= "")
-        self.video_view.place(x=125,y=70 )
+        self.video_view.place(x=125,y=100 )
 
         self.is_detection_running = False
         # self.update()
@@ -279,9 +277,9 @@ class main_gui :
         self.is_detection_running = False
 
     def call_threaded_cam(self):
-        self.cam_connect_button.destroy
-        self.cam_disconnect_button = ct.CTkButton(master = self.right_frame, image= self.dis_cam_img, text="", fg_color="red",hover_color="green", corner_radius=500 ,width=10 ,height=10, command=self.stop_camera)  # Connect/disconnect button 
-        self.cam_disconnect_button.place(x=150, y=20)
+        # self.cam_connect_button.destroy
+        # self.cam_disconnect_button = ct.CTkButton(master = self.right_frame, image= self.dis_cam_img, text="", fg_color="red",hover_color="green", corner_radius=500 ,width=10 ,height=10, command=self.stop_camera)  # Connect/disconnect button 
+        # self.cam_disconnect_button.place(x=150, y=20)
         
         self.c1= threading.Thread(target=self.camera_connect())
         self.c1.start()
@@ -317,7 +315,7 @@ class main_gui :
                         cvzone.putTextRect(self.img, self.label, (max(0, x1), max(0, y1)))
 
             
-            new_width = 1000  # Adjust the width as needed
+            new_width = 900  # Adjust the width as needed
             aspect_ratio = self.img.shape[1] / self.img.shape[0]
             new_height = int(new_width / aspect_ratio)
     
@@ -379,8 +377,12 @@ class main_gui :
             self.drone_controller.set_mode()
 
     def pixshawk_arm(self):
-        if self.drone_controller:
-            self.drone_controller.arming()
+        
+        try:
+            if self.drone_controller:
+                self.drone_controller.arming()
+        except Exception as e:
+            print(e)
 
 
     def pixshawk_disarm(self):
@@ -389,8 +391,6 @@ class main_gui :
     def pixshawk_get_info(self):
         if self.drone_controller:
             self.drone_info = self.drone_controller.print_vehicle_info()
-            print(type(self.drone_info))
-            # print("done info : ",self.drone_info)
             self.altitude.configure(text=round(self.drone_info[0], 2))
             self.ground_speed.configure(text=round(self.drone_info[1], 2))
             # Assuming self.drone_info[2] is a list of values to be rounded individually

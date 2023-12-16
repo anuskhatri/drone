@@ -37,7 +37,6 @@ class DroneController:
             self.vehicle.battery.voltage,
             self.vehicle.rangefinder.distance,
             ]
-        print("rangefinder",self.vehicle.rangefinder)
         return data
 
     def arming(self):
