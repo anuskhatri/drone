@@ -3,11 +3,7 @@ import time
 
 # Set the connection string to the USB port where Pixhawk is connected.
 # For Windows, the port should be in the format 'COMx', where x is the port number.
-<<<<<<< HEAD
-connection_string = 'COM11'
-=======
 connection_string = 'COM5'
->>>>>>> anus/feature
 
 # Connect to the vehicle.
 vehicle = connect(connection_string, baud=57600, wait_ready=True)
