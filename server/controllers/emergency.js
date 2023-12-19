@@ -2,7 +2,6 @@ const { pool } = require('../config/dbConfig');
 
 const emergency = async (req, res) => {
     const { name, email, contact, location } = req.body;
-    console.log(req.body);
     try {
         const {longitude,latitude} = location
 

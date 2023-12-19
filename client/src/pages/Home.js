@@ -2,13 +2,13 @@
 
 import { useContext, useEffect } from 'react';
 import NavBar from '../components/NavBar';
-import { Conetxt } from '../context/Context';
+import { Context } from '../context/Context';
 import { Button } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
 
 const Home = () => {
     const nav = useNavigate()
-    const { sendEmergencyAlert, socket } = useContext(Conetxt);
+    const { sendEmergencyAlert, socket } = useContext(Context);
 
     return (
         <>
