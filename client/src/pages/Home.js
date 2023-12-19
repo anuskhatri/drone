@@ -1,14 +1,14 @@
 // Home.jsx
 
-import { useContext, useEffect } from 'react';
-import NavBar from '../components/NavBar';
-import { Context } from '../context/Context';
-import { Button } from 'react-bootstrap';
-import { useNavigate } from 'react-router-dom';
+import { useContext, useEffect } from 'react'
+import NavBar from '../components/NavBar'
+import { Context } from '../context/Context'
+import { Button } from 'react-bootstrap'
+import { useNavigate } from 'react-router-dom'
 
 const Home = () => {
     const nav = useNavigate()
-    const { sendEmergencyAlert, socket } = useContext(Context);
+    const { sendEmergencyAlert, socket } = useContext(Context)
 
     return (
         <>
@@ -19,7 +19,7 @@ const Home = () => {
                 </div>
             </div>
         </>
-    );
-};
+    )
+}
 
-export default Home;
+export default Home

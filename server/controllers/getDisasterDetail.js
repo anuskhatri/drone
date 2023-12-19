@@ -1,4 +1,4 @@
-const { pool } = require('../config/dbConfig');
+const { pool } = require('../config/dbConfig')
 
 getDisasterDetail=async(req,res)=>{
     try {
@@ -9,4 +9,4 @@ getDisasterDetail=async(req,res)=>{
     }
 }
 
-module.exports = getDisasterDetail;
+module.exports = getDisasterDetail

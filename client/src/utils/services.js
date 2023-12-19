@@ -11,7 +11,7 @@ export const postReq = async (url, userData) => {
             'Access-Control-Allow-Origin': '*',
             'Access-Control-Allow-Headers': '*',
         },
-    });
+    })
 
     if (response.data?.error) {
         return { error: true, data: response.data }

@@ -1,23 +1,24 @@
-import { createContext, useCallback, useEffect, useState } from 'react';
-import { io } from 'socket.io-client';
-import { baseUrl, postReq, socketUrl } from '../utils/services';
-import axios from 'axios';
-export const Conetxt = createContext();
-export const Context = createContext();
+import { createContext, useCallback, useEffect, useState } from 'react'
+import { io } from 'socket.io-client'
+import { baseUrl, postReq, socketUrl } from '../utils/services'
+import axios from 'axios'
+export const Context = createContext()
 
+// ContextProvider
 // ContextProvider
 export const ContextProvider = ({ children }) => {
     const [socket, setSocket] = useState();
-    const [connectingServer, setConnectionServer] = useState(false);
+    const [socketConnecting, setSocketConnecting] = useState(true); // Renamed to `socketConnecting`
     const [emergencyData, setEmergencyData] = useState();
     const [alertError, setAlertError] = useState();
-
+    
     useEffect(() => {
         try {
             const newSocket = io("http://localhost:5000");
 
             newSocket.on("connect", () => {
-            console.log("Socket connected");
+                console.log("Socket connected");
+                setSocketConnecting(false);
             });
             newSocket.on("disconnect", () => {
             });
@@ -32,10 +33,9 @@ export const ContextProvider = ({ children }) => {
         }
     }, []);
 
-    const notifyAlert = (emergencyData) => {
+    const notifyAlert = useCallback((emergencyData) => {
         if (socket) {
             try {
-                // Use the local socket instance to emit the event
                 socket.emit("alertFromClient", emergencyData);
             } catch (error) {
                 console.log(error);
@@ -43,25 +43,13 @@ export const ContextProvider = ({ children }) => {
         } else {
             console.log("Socket not found");
         }
-    };
-
+    });
 
     const sendEmergencyAlert = useCallback(async (emergencyData) => {
         try {
-
-            // Make sure socket is available before emitting
-            if (socket) {
-                notifyAlert(emergencyData);
-            } else {
-                console.log("Socket not found");
-            }
-
-            setAlertError(null);
-            setConnectionServer(true);
-
             const response = await postReq(`${baseUrl}/api/disaster/emergency`, emergencyData);
 
-            setConnectionServer(false);
+            setSocketConnecting(false); // Update the connection state
 
             if (response.data.error) {
                 console.log(response.data.error);
@@ -70,24 +58,25 @@ export const ContextProvider = ({ children }) => {
 
             setEmergencyData(emergencyData);
 
-            return response.data.insertedData;
+            return response.data;
         } catch (error) {
             setAlertError(error);
             console.error(error);
         }
     }, [socket]); // Make sure to include socket as a dependency
 
-
     return (
         <Context.Provider
             value={{
                 sendEmergencyAlert,
                 socket,
-                connectingServer,
-                alertError
+                socketConnecting, // Updated name
+                alertError,
+                notifyAlert,
             }}
         >
             {children}
         </Context.Provider>
     );
 };
+

@@ -16,7 +16,7 @@ import { Button } from 'react-bootstrap';
 import { Context } from '../context/Context';
 import { useNavigate } from 'react-router-dom';
 
-const Emergency=()=> {
+const Emergency = () => {
   const { sendEmergencyAlert, alertError } = useContext(Context);
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
@@ -25,7 +25,7 @@ const Emergency=()=> {
   const [useMyLocation, setUseMyLocation] = useState(false);
   const [latitude, setLatitude] = useState(null);
   const [longitude, setLongitude] = useState(null);
-  const [alertSent, setAlertSent] = useState(null)
+  const [response, setResponse] = useState(null)
   const nav = useNavigate()
   const handleRegister = async () => {
     // Validate all fields are filled
@@ -105,10 +105,16 @@ const Emergency=()=> {
       };
 
       // Call the sendEmergencyAlert function with the alertData, latitude, and longitude
-     sendEmergencyAlert(alertData)
-    //  alert('Alert sent ')
-    //  nav('/')
-      
+      const response = await sendEmergencyAlert(alertData)
+      console.log(response);
+      if (response?.error) {
+        alert(response.error)
+      }
+      else if (response?.message) {
+        alert(response.message)
+      }
+      //  nav('/')
+
       // Optionally, you can reset the form fields after successful submission
       setName('');
       setEmail('');
@@ -117,7 +123,7 @@ const Emergency=()=> {
       setUseMyLocation(false);
       setLatitude(null);
       setLongitude(null);
-    } 
+    }
     catch (error) {
       console.error('Error during registration:', error.message);
       alert('An error occurred during registration.');
@@ -197,7 +203,7 @@ const Emergency=()=> {
 
               <Button variant="primary" onClick={handleRegister}>Submit</Button>
             </MDBCol>
-
+            {/* {response && <h3>Check mail verification</h3>} */}
             <MDBCol md='10' lg='6' className='order-1 order-lg-2 d-flex align-items-center'>
               <MDBCardImage src={dronImage} fluid />
             </MDBCol>
