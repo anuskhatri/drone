@@ -6,7 +6,7 @@ sio = socketio.Client()
 def alert_received(data):
     print(f"Value of key1: {data}")
     
-@sio.event
+@sio.event  
 def connect():
     print('Connected to server')
 
@@ -27,7 +27,9 @@ def servermessage(data):
 def disconnect():
     print('Disconnected from server')
 
-sio.connect('http://localhost:5000')
+sio.connect('https://2002-2409-40c0-105d-7901-892d-fe7-7b71-9117.ngrok-free.app')
+    
+# sio.connect('http://localhost:5000')
 
 # Perform actions after connecting
 # emit_alert_after_delay()

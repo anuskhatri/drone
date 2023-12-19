@@ -1,8 +1,8 @@
 from dronekit import connect, VehicleMode
 import time
 
-connection_string = 'COM13'
-vehicle = connect(connection_string, baud=57600, wait_ready=True)
+connection_string = 'COM5'
+vehicle = connect(connection_string, baud=57600, wait_ready=False)
 
 def drop_package(value):
     # Ensure the value is within the valid range (1000 to 2000)
@@ -27,7 +27,7 @@ def arming():
         time.sleep(1)
 
     print("Vehicle armed!")
-
+# arming()
 def disarming():
     # Disarm the vehicle
     vehicle.armed = False
@@ -50,7 +50,7 @@ def disarming():
 
 # Print updated vehicle information.
 
-# print_vehicle_info()
+print(print_vehicle_info())
 
 # Disarm the vehicle
 
