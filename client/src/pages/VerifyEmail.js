@@ -16,7 +16,7 @@ const VerifyEmail = () => {
       if (response.data?.error) {
         setIsUserVerified(false);
       } else if (response.data.message === 'Alert sent') {
-        await notifyAlert(response.data.data[0]);
+        await notifyAlert(response.data.data);
         setIsUserVerified(true);
       }
     } catch (error) {

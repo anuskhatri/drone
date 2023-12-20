@@ -29,17 +29,12 @@ const Emergency = () => {
   const nav = useNavigate()
   const handleRegister = async () => {
     // Validate all fields are filled
-    if (!name || !email || !number || (!useMyLocation && !location)) {
+    if (!name || !number || (!useMyLocation && !location)) {
       alert('Please fill in all required fields.');
       return;
     }
 
     // Basic email validation
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(email)) {
-      alert('Please enter a valid email address.');
-      return;
-    }
 
     // Basic number validation (you can customize this based on your requirements)
     const numberRegex = /^\d+$/;
@@ -154,7 +149,7 @@ const Emergency = () => {
                   onChange={(e) => setName(e.target.value)}
                 />
               </div>
-
+{/* 
               <div className="d-flex flex-row align-items-center mb-4">
                 <MDBIcon fas icon="envelope me-3" size='lg' />
                 <MDBInput
@@ -164,7 +159,7 @@ const Emergency = () => {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                 />
-              </div>
+              </div> */}
 
               <div className="d-flex flex-row align-items-center mb-4">
                 <MDBIcon fas icon="lock me-3" size='lg' />

@@ -36,6 +36,7 @@ export const ContextProvider = ({ children }) => {
     const notifyAlert = useCallback((emergencyData) => {
         if (socket) {
             try {
+                console.log(emergencyData);
                 socket.emit("alertFromClient", emergencyData);
             } catch (error) {
                 console.log(error);
