@@ -17,8 +17,8 @@ const htmlContent = (url) => {
     
     <head>
         <meta content="text/html; charset=utf-8" http-equiv="Content-Type" />
-        <title>Reset Password</title>
-        <meta name="description" content="Reset Password Email Template.">
+        <title>Verify Your Email</title>
+        <meta name="description" content="Verify Email Template.">
         <style type="text/css">
             a:hover {text-decoration: underline !important;}
         </style>
@@ -37,9 +37,8 @@ const htmlContent = (url) => {
                         </tr>
                         <tr>
                             <td style="text-align:center;">
-                              <a href="https://smowcode.com" title="logo" target="_blank">
-                                <img src="https://smowcode.com/wp-content/uploads/2023/01/smowcode-text-logo-low-res-reg-1.png" title="logo" alt="logo">
-                              </a>
+                            <h1 style="color:#1e1e2d; font-weight:500; margin:0;font-size:32px;font-family:'Rubik',sans-serif;">Verify Your Email</h1>
+                              
                             </td>
                         </tr>
                         <tr>
@@ -54,20 +53,20 @@ const htmlContent = (url) => {
                                     </tr>
                                     <tr>
                                         <td style="padding:0 30px; justify-text:auto">
-                                            <h1 style="color:#1e1e2d; font-weight:500; margin:0;font-size:32px;font-family:'Rubik',sans-serif;">Reset your password</h1>
+                                            <h1 style="color:#1e1e2d; font-weight:500; margin:0;font-size:32px;font-family:'Rubik',sans-serif;">Verify</h1>
                                             <span
                                                 style="display:inline-block; vertical-align:middle; margin:29px 0 26px; border-bottom:1px solid #cecece; width:100px;"></span>
                                             <p style="color:#455056; font-size:15px;line-height:40px; margin:0;">
-                                            We received a request to reset your password. If you did not make this request, please ignore this email.
+                                            Verify Your Email Address. If you did not make this request, please ignore this email.
                                             <br/>
                                             This request will expire in 10 minutes for security reasons.
                                             <br/>
-                                            To reset your password, click on the below :
+                                            To verify your email, click on the below :
                                             </p>
                                             
                                             <a href=${url}
-                                                style="background:#208AB4;text-decoration:none !important; font-weight:500; margin-top:35px; color:#fff;text-transform:uppercase; font-size:14px;padding:10px 24px;display:inline-block;">Reset
-                                                Password</a>
+                                                style="background:#208AB4;text-decoration:none !important; font-weight:500; margin-top:35px; color:#fff;text-transform:uppercase; font-size:14px;padding:10px 24px;display:inline-block;">Verify
+                                                Email</a>
                                         </td>
                                     </tr>
                                     <tr>

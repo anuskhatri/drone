@@ -1,27 +1,24 @@
-const { pool } = require('../config/dbConfig')
-const nodemailer = require('nodemailer')
-const jwt = require('jsonwebtoken')
-require('dotenv').config()
+const express = require('express');
+const disasterRoute = express.Router();
 
-const senderEmail = process.env.SENDER_EMAIL
-const senderPass = process.env.SENDER_APP_PASS
-const secret = process.env.SESSION_SECRET 
-const urlAdddress = process.env.FRONTEND_URL
+const { pool } = require('../config/dbConfig');
+const nodemailer = require('nodemailer');
 
+// Create a Nodemailer transporter
 const transporter = nodemailer.createTransport({
     service: 'gmail',
     auth: {
         user: process.env.SENDER_EMAIL,
-        pass: process.env.SENDER_APP_PASS
-    }
+        pass: process.env.SENDER_APP_PASS,
+    },
 });
 
-const htmlContent = (hospital) => {
+const htmlContent = (hospital, count) => {
     // Replace placeholders with actual values
-    const { name, location } = hospital;
+    const { name, location, distance } = hospital;
     const { x: longitude, y: latitude } = location;
-    const googleMapsURL = `https://www.google.com/maps?q=${latitude},${longitude}`;
-    
+    const googleMapsURL = `https://www.google.com/maps?q=17.4569692,78.6652037`;
+
     return `
         <!DOCTYPE html>
         <html lang="en-US">
@@ -49,13 +46,6 @@ const htmlContent = (hospital) => {
                                 <td style="height:80px;">&nbsp;</td>
                             </tr>
                             <tr>
-                                <td style="text-align:center;">
-                                    <a href="https://yourwebsite.com" title="logo" target="_blank">
-                                        <img src="https://yourwebsite.com/path/to/logo.png" title="logo" alt="logo">
-                                    </a>
-                                </td>
-                            </tr>
-                            <tr>
                                 <td style="height:20px;">&nbsp;</td>
                             </tr>
                             <tr>
@@ -73,14 +63,15 @@ const htmlContent = (hospital) => {
                                                 <p style="color:#455056; font-size:15px;line-height:40px; margin:0;">
                                                     Dear ${name},
                                                     <br/>
-                                                    There is an emergency near your hospital. Please take necessary precautions.
+                                                    There is an emergency near your hospital.
+                                                    We found ${count} people injured.
+                                                    Please take necessary precautions to save human life.
                                                     <br/>
                                                     Location Details:
                                                     <br/>
                                                     Latitude: ${latitude}
                                                     <br/>
                                                     Longitude: ${longitude}
-                                                    <br/>
                                                     You can view the location on Google Maps by clicking the following link:
                                                     <a href="${googleMapsURL}" target="_blank">View on Google Maps</a>
                                                 </p>
@@ -109,8 +100,8 @@ const htmlContent = (hospital) => {
 };
 
 
-const emergency_mail = (req, res) => {
-    const { longitude, latitude } = req.body.location;
+const getUserCount = (req, res) => {
+    const count = req.params.count; // Corrected to retrieve count from req.params.count
 
     const query = `
         SELECT
@@ -124,9 +115,8 @@ const emergency_mail = (req, res) => {
             distance
         LIMIT 5;`;
 
-    pool.query(query, [longitude, latitude])
+    pool.query(query, [78.6652037, 17.4569692])
         .then(result => {
-            console.log(result.rows);
             const hospitals = result.rows;
 
             hospitals.forEach(hospital => {
@@ -134,7 +124,7 @@ const emergency_mail = (req, res) => {
                     from: process.env.SENDER_EMAIL,
                     to: hospital.email,
                     subject: 'Emergency Alert',
-                    html: htmlContent(hospital)
+                    html: htmlContent(hospital, count),
                 };
 
                 transporter.sendMail(mailOptions, (error, info) => {
@@ -155,5 +145,4 @@ const emergency_mail = (req, res) => {
         });
 };
 
-
-module.exports = emergency_mail;
+module.exports = getUserCount;

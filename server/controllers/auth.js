@@ -1,10 +1,42 @@
 const { verifyrece_token } = require('../middleware/jwtToken')
 const { pool } = require('../config/dbConfig')
+const nodemailer = require('nodemailer')
+const jwt = require('jsonwebtoken')
+require('dotenv').config()
+
+const senderEmail = process.env.SENDER_EMAIL
+const senderPass = process.env.SENDER_APP_PASS
+const secret = process.env.SESSION_SECRET
+const urlAdddress = process.env.FRONTEND_URL
+
+const transporter = nodemailer.createTransport({
+    service: 'gmail',
+    auth: {
+        user: senderEmail,
+        pass: senderPass
+    }
+})
 
 const verifyUser = async (req, res) => {
 
     const { token } = req.body
     try {
+
+        const mailOptions = {
+            from: senderPass,
+            to: userinfo.email,
+            subject: 'Verify user',
+            html: htmlContent(`${urlAdddress}/verify-email/${token}`)
+        }
+
+        transporter.sendMail(mailOptions, (error, info) => {
+            if (error) {
+                console.log(error);
+                return res.send({ Error: error })
+            } else {
+                return res.send({ message: "Check mail" })
+            }
+        })
         const user = await verifyrece_token(token)
         if (user == "not valid") {
             return res.send({ error: "invalid user" })
@@ -15,7 +47,8 @@ const verifyUser = async (req, res) => {
                 `INSERT INTO disaster_detail(user_id, location) VALUES($1, POINT($2, $3)) RETURNING *`,
                 [user.id, user.location.longitude, user.location.latitude]
             )
-            return res.send({ message: "Alert sent", data:user })
+
+            return res.send({ message: "Alert sent", data: user })
         }
         else {
             res.send({ error: "something went wrong" })
