@@ -126,7 +126,7 @@ const verifyUser = async (req, res) => {
                 `INSERT INTO disaster_detail(user_id, location) VALUES($1, POINT($2, $3)) RETURNING *`,
                 [user.id, user.location.longitude, user.location.latitude]
             )
-            // sendSms()
+            sendSms()
 
             const query = `
         SELECT

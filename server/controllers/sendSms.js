@@ -8,7 +8,7 @@ const client = require('twilio')(accountSid, authToken);
  const sendSms = () => {
   try {
     client.messages.create({
-      body: 'Alert there is a disaster occured in your area',
+      body: 'Alert there is a disaster occured location:- https://www.google.com/maps?q=17.45666667,78.66527778',
       from: '+12059272734',
       to: '+918696074241'
     }).then(message => console.log(message.sid));
