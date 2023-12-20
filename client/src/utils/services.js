@@ -2,7 +2,7 @@ import axios from 'axios'
 
 export const baseUrl = 'http://localhost:4000'
 
-export const socketUrl = 'http://localhost:5000'
+export const socketUrl = 'https://9186-202-134-156-97.ngrok-free.app'
 
 export const postReq = async (url, userData) => {
     const response = await axios.post(url, userData, {
@@ -13,7 +13,6 @@ export const postReq = async (url, userData) => {
         },
     });
 
-    console.log(response);
     if (response.data?.error) {
         return { error: true, data: response.data }
     }

@@ -13,11 +13,11 @@ const io = new Server(httpServer, {
 let onlineUser = []
 let alertData
 io.on("connection", (socket) => {
+console.log(socket.id);
     onlineUser.push(socket.id)
-
     socket.on("alertFromClient", (message) => {
-        console.log(JSON.stringify(message));
-        io.emit("alert",message)
+        console.log(message);
+        io.emit("alert", message)
     });
 
     socket.on("disconnect", () => {

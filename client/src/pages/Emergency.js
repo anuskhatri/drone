@@ -13,11 +13,11 @@ import {
   MDBCheckbox
 } from 'mdb-react-ui-kit';
 import { Button } from 'react-bootstrap';
-import { Conetxt } from '../context/Context';
+import { Context } from '../context/Context';
 import { useNavigate } from 'react-router-dom';
 
 const Emergency=()=> {
-  const { sendEmergencyAlert, alertError } = useContext(Conetxt);
+  const { sendEmergencyAlert, alertError } = useContext(Context);
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [number, setNumber] = useState('');
@@ -66,7 +66,6 @@ const Emergency=()=> {
         };
 
         setLocation(userLocation);
-        console.log('Using user location:', userLocation);
       }
       else if (!useMyLocation) {
         // Use Nominatim for geocoding without an API key
@@ -86,7 +85,6 @@ const Emergency=()=> {
             };
 
             setLocation(userLocation);
-            console.log('User entered location coordinates:', userLocation);
           } else {
             console.error('Location not found.');
             return;
@@ -107,10 +105,9 @@ const Emergency=()=> {
       };
 
       // Call the sendEmergencyAlert function with the alertData, latitude, and longitude
-     setAlertSent(sendEmergencyAlert(alertData))
-
-     alert('Alert sent ')
-     nav('/')
+     sendEmergencyAlert(alertData)
+    //  alert('Alert sent ')
+    //  nav('/')
       
       // Optionally, you can reset the form fields after successful submission
       setName('');
