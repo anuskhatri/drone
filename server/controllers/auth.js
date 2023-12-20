@@ -21,22 +21,6 @@ const verifyUser = async (req, res) => {
 
     const { token } = req.body
     try {
-
-        const mailOptions = {
-            from: senderPass,
-            to: userinfo.email,
-            subject: 'Verify user',
-            html: htmlContent(`${urlAdddress}/verify-email/${token}`)
-        }
-
-        transporter.sendMail(mailOptions, (error, info) => {
-            if (error) {
-                console.log(error);
-                return res.send({ Error: error })
-            } else {
-                return res.send({ message: "Check mail" })
-            }
-        })
         const user = await verifyrece_token(token)
         if (user == "not valid") {
             return res.send({ error: "invalid user" })
