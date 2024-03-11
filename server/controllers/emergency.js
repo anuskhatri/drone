@@ -95,7 +95,7 @@ const getInfo = async (adharNumber) => {
     // const userInfo = await pool.query(`SELECT * FROM user`)
     const userInfo = await pool.query(`SELECT email,id FROM user_register WHERE adhar_number = $1`, [adharNumber])
     // console.log(userInfo)
-    return userInfo.rows[0]
+    return userInfo?.rows[0]
 }
 const transporter = nodemailer.createTransport({
     service: 'gmail',
@@ -120,7 +120,7 @@ const emergency = async (req, res) => {
 
         const payload = {...req.body,id:userinfo.id}
         const token = jwt.sign(payload, secret, {
-            expiresIn: '10m'
+            expiresIn: '24h'
         })
         // verifyrece_token(token)
         const mailOptions = {

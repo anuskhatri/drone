@@ -66,7 +66,7 @@ class main_gui :
         
 
 #-----------------------------------------image variables--------------------------------------------
-        connect_original_image = Image.open("C:\\Users\\Mr.Hetal Hakani\\Desktop\\SIH project\\drone\\GUI\\images\\connect_button.png")
+        connect_original_image = Image.open("images\\connect_button.png")
         connect_resized_image = connect_original_image.resize((40, 40), Image.ANTIALIAS)
         self.connect_button_img = ImageTk.PhotoImage(connect_resized_image)
         self.mail_status= True

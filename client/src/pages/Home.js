@@ -13,7 +13,7 @@ const Home = () => {
     return (
         <>
             <div className='home-bg'>
-                    <div className='home-title '>CodeCopter</div>
+                    <div className='home-title '>AeroSafeGuard</div>
                 <div className="">
                     <button onClick={()=>nav('/emergency')}className='emergency-button'>Emergency</button>
                 </div>

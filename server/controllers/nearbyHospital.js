@@ -16,10 +16,9 @@ const transporter = nodemailer.createTransport({
     }
 });
 
-const htmlContent = (hospital) => {
+const htmlContent = (hospital,longitude,latitude) => {
     // Replace placeholders with actual values
     const { name, location } = hospital;
-    const { x: longitude, y: latitude } = location;
     const googleMapsURL = `https://www.google.com/maps?q=${latitude},${longitude}`;
     
     return `
@@ -110,6 +109,7 @@ const htmlContent = (hospital) => {
 
 
 const emergency_mail = (req, res) => {
+    console.log(req.body)
     const { longitude, latitude } = req.body.location;
 
     const query = `
@@ -134,7 +134,7 @@ const emergency_mail = (req, res) => {
                     from: process.env.SENDER_EMAIL,
                     to: hospital.email,
                     subject: 'Emergency Alert',
-                    html: htmlContent(hospital)
+                    html: htmlContent(hospital,longitude,latitude)
                 };
 
                 transporter.sendMail(mailOptions, (error, info) => {

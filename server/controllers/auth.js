@@ -19,10 +19,11 @@ const transporter = nodemailer.createTransport({
     }
 });
 
-const htmlContent = (hospital) => {
+const htmlContent = (user) => {
     // Replace placeholders with actual values
-    const { name, location } = hospital;
-    const { x: longitude, y: latitude } = location;
+    const { name, location } = user;
+    const {longitude,latitude } = location;
+
     const googleMapsURL = `https://www.google.com/maps?q=${latitude},${longitude}`;
     
     return `
@@ -121,12 +122,12 @@ const verifyUser = async (req, res) => {
             return res.send({ error: "invalid user" })
         }
         else if (user) {
-            console.log(user);
+            console.log("user   ",user);
             const result = await pool.query(
                 `INSERT INTO disaster_detail(user_id, location) VALUES($1, POINT($2, $3)) RETURNING *`,
                 [user.id, user.location.longitude, user.location.latitude]
             )
-            sendSms()
+            // sendSms()
 
             const query = `
         SELECT
@@ -150,7 +151,7 @@ const verifyUser = async (req, res) => {
                             from: process.env.SENDER_EMAIL,
                             to: hospital.email,
                             subject: 'Emergency Alert',
-                            html: htmlContent(hospital)
+                            html: htmlContent(user)
                         };
 
                         transporter.sendMail(mailOptions, (error, info) => {

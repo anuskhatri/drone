@@ -12,7 +12,6 @@ const VerifyEmail = () => {
   const handleVerification = async () => {
     try {
       const response = await axios.post(`${baseUrl}/api/disaster/auth`, { token });
-      console.log(response);
       if (response.data?.error) {
         setIsUserVerified(false);
       } else if (response.data.message === 'Alert sent') {
@@ -32,14 +31,27 @@ const VerifyEmail = () => {
   }, [isUserVerified, socket]);
 
   if (isUserVerified === null) {
-    return <p>Loading...</p>; // You can replace this with a loading indicator
-  } else if (!isUserVerified) {
-    return <p>Alert failed</p>;
-  } else if (isUserVerified) {
     return (
-      <>Alert Sent</>
-    );
+      <div className='home-bg'>
+        <div className='home-title '>Loading...</div>
+      </div> // You can replace this with a loading indicator
+    )
   }
+  else if (!isUserVerified) {
+    return (
+      <div className='home-bg'>
+        <div className='home-title '>Alert failed</div>
+      </div> 
+    )
+  }
+  else if (isUserVerified) {
+    return (
+      <div className='home-bg'>
+        <div className='home-title '>Alert Sent</div>
+      </div> 
+    )
+  }
+
 };
 
 export default VerifyEmail;
