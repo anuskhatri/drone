@@ -1,0 +1,16 @@
+version: '3'
+services:
+  drone-project-client:
+    image: anuskhatri15/drone-project-client:latest
+    ports:
+      - "3000:3000"
+    # Add any additional configuration as needed
+
+  drone-project-server:
+    image: anuskhatri15/drone-project-server:v1.0
+    ports:
+      - "4000:4000"
+  drone-project-socket:
+    image: anuskhatri15/drone-project-socket:latest
+    ports:
+      - "5000:5000"
