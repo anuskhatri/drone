@@ -14,7 +14,7 @@ export const ContextProvider = ({ children }) => {
     
     useEffect(() => {
         try {
-            const newSocket = io("http://localhost:5000");
+            const newSocket = io(socketUrl);
 
             newSocket.on("connect", () => {
                 console.log("Socket connected");

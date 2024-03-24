@@ -1,8 +1,8 @@
 import axios from 'axios'
 
-export const baseUrl = 'http://localhost:4000'
+export const baseUrl = 'http://192.168.0.100:4000'
 
-export const socketUrl = 'https://9186-202-134-156-97.ngrok-free.app'
+export const socketUrl = 'http://192.168.0.100:5000'
 
 export const postReq = async (url, userData) => {
     const response = await axios.post(url, userData, {

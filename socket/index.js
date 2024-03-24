@@ -1,11 +1,12 @@
 const { createServer } = require("http")
 const { Server } = require("socket.io")
+require('dotenv').config()
 
 const httpServer = createServer()
-
+const frontendUrl = process.env.FRONTEND_URL
 const io = new Server(httpServer, {
     cors: {
-        origin: "http://localhost:3000",
+        origin: frontendUrl,
         methods: ["GET", "POST"]
     }
 })
