@@ -164,7 +164,7 @@ const Emergency = () => {
               <div className="d-flex flex-row align-items-center mb-4">
                 <MDBIcon fas icon="lock me-3" size='lg' />
                 <MDBInput
-                  label=' Adhar number'
+                  label='Contact number'
                   id='form3'
                   type='text'
                   value={number}

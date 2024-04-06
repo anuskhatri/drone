@@ -1,15 +1,28 @@
 from dronekit import connect, VehicleMode
 import time
+from CTkMessagebox import CTkMessagebox 
+
+class Error_pop_up:
+    def connection_error(self, error_name):
+        self.msg=ctkmessagebox = CTkMessagebox( title='Error', message=f'Error connecting: {error_name}', fade_in_duration=0, option_1="OK")
+        ctkmessagebox.after(10000, ctkmessagebox.button_event)
+
+        if self.msg.get()=='Cancel':
+            return False
 
 class DroneController:
-    def __init__(self, connection_string='COM11', baud=57600, wait_ready=False):
+    connected = False
+    def __init__(self, connection_string='COM13', baud=57600, wait_ready=False):
+        self.error_pop_up = Error_pop_up()
         try:
             print("working 1")
             self.vehicle = connect(connection_string, baud=baud, wait_ready=wait_ready)
             self.connected = True
         except Exception as e:
+            print(type(e))
             print(f"Connection failed: {e}")
             self.connected = False
+            self.error_pop_up.connection_error(connection_string)
         
     def drop_package(self):
         if not self.connected:

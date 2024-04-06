@@ -6,7 +6,7 @@ import time
 connection_string = 'COM5'
 
 # Connect to the vehicle.
-vehicle = connect(connection_string, baud=57600, wait_ready=True)
+vehicle = connect(connection_string, baud=9600, wait_ready=True)
 
 def send_signal_to_channel_6(value):
     # Ensure the value is within the valid range (1000 to 2000)
@@ -36,24 +36,15 @@ def print_vehicle_info():
 print_vehicle_info()
 
 # Change vehicle mode to GUIDED
-vehicle.mode = VehicleMode("GUIDED")
 
 # Arm the vehicle
 vehicle.armed = False
 
-# Wait for the vehicle to arm
-while not vehicle.armed:
-    print("Waiting for arming...")
-    time.sleep(1)
 
 # Send a signal to Channel 6 (set servo motor position)
 channel_6_value = 2000  # Adjust this value based on your servo motor's range
-send_signal_to_channel_6(channel_6_value)
-
-print("Vehicle armed!")
 
 # Print updated vehicle information.
-print_vehicle_info()
 
 # Close the vehicle connection
 vehicle.close()

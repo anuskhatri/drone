@@ -33,6 +33,14 @@ class Pop_up:
 
         elif self.msg.get()=='Cancel':
             return False
+        
+class Error_pop_up:
+    def connection_error(self, error_name):
+        self.msg=ctkmessagebox = CTkMessagebox( title='Error', message=f'Error connecting: {error_name}', fade_in_duration=100, option_1="OK",)
+        ctkmessagebox.after(10000, ctkmessagebox.button_event)
+
+        if self.msg.get()=='Cancel':
+            return False
 
 class main_gui :
 
@@ -47,8 +55,10 @@ class main_gui :
 
 
     def __init__(self):
-
+        self.is_camera_connect_running = False
+        self.error_p1 = Error_pop_up()
         self.p1 =Pop_up()
+
         self.root = ct.CTk() #object 
         self.root.title("Drone Software")
         self.ports = serial.tools.list_ports.comports()
@@ -66,21 +76,22 @@ class main_gui :
         
 
 #-----------------------------------------image variables--------------------------------------------
-        connect_original_image = Image.open("images\\connect_button.png")
+        connect_original_image = Image.open("GUI\\images\\connect_button.png")
         connect_resized_image = connect_original_image.resize((40, 40), Image.ANTIALIAS)
         self.connect_button_img = ImageTk.PhotoImage(connect_resized_image)
+
         self.mail_status= True
-        dis_original_image = Image.open("images\\disconnect_button.png")
+        dis_original_image = Image.open("GUI\\images\\disconnect_button.png")
         dis_resized_image = dis_original_image.resize((40, 40), Image.ANTIALIAS)
         self.dis_button_img = ImageTk.PhotoImage(dis_resized_image)
 
-        dis_cam_image = Image.open("images\\disconnected_cam.png")
-        dis_resized_image = dis_cam_image.resize((40, 40), Image.ANTIALIAS)
-        self.dis_cam_img = ImageTk.PhotoImage(dis_resized_image)
+        dis_cam_image = Image.open("GUI\\images\\disconnected_cam.png")
+        conncam_resized_image = dis_cam_image.resize((40, 40), Image.ANTIALIAS)
+        self.dis_cam_img = ImageTk.PhotoImage(conncam_resized_image)
 
-        conn_cam_image = Image.open("images\\connected_cam.png")
-        dis_resized_image = conn_cam_image.resize((40, 40), Image.ANTIALIAS)
-        self.conn_cam_img = ImageTk.PhotoImage(dis_resized_image)
+        conn_cam_image = Image.open("GUI\\images\\connected_cam.png")
+        discam_resized_image = conn_cam_image.resize((40, 40), Image.ANTIALIAS)
+        self.conn_cam_img = ImageTk.PhotoImage(discam_resized_image)
 
         self.screen_height=self.root.winfo_screenheight()
         self.screen_width=self.root.winfo_screenwidth()
@@ -114,7 +125,7 @@ class main_gui :
         self.com_port.set("COM1")
         self.com_port.place(x=1250,y=10)
 
-        self.arm_button = ct.CTkButton(master = self.left_frame, text="Arm",command=lambda:threading.Thread(target= self.pixshawk_arm()))  # Connect/disconnect button 
+        self.arm_button = ct.CTkButton(master = self.left_frame, text="Arm",command=lambda:threading.Thread(target= self.pixshawk_arm(), daemon=True))  # Connect/disconnect button 
         self.arm_button.place(x=20 , y=450)
 
         self.auto_land_button = ct.CTkButton(master = self.left_frame, text="Auto land")  # Connect/disconnect button 
@@ -193,7 +204,7 @@ class main_gui :
 
         try:
             from socketTest import MySocketIOClient
-            self.server_url = 'https://d66f-2409-40f0-1028-fc4b-b97b-ecb6-a4c8-96c5.ngrok-free.app'
+            self.server_url = ' https://49c3-103-120-208-25.ngrok-free.app'
             self.my_client = MySocketIOClient(self.server_url)
             self.my_client.start()
     
@@ -226,11 +237,8 @@ class main_gui :
         self.cam_label = ct.CTkLabel(self.right_frame, text= "Camera view", font=('Helvetica', 14))
         self.cam_label.place(x=200, y= 80)
 
-        self.cam_connect_button = ct.CTkButton(master = self.right_frame, image= self.dis_cam_img, text="", fg_color="red",hover_color="green", corner_radius=500 ,width=10 ,height=10, command=self.call_threaded_cam)  # Connect/disconnect button 
+        self.cam_connect_button = ct.CTkButton(master = self.right_frame, image= self.conn_cam_img, text="", fg_color="red",hover_color="green", corner_radius=500 ,width=10 ,height=10, command=self.call_threaded_cam)  # Connect/disconnect button 
         self.cam_connect_button.place(x=50, y=20) #camera button 
-
-        # self.cam_disconnect_button = ct.CTkButton(master = self.right_frame, image= self.dis_cam_img, text="", fg_color="green",hover_color="red", corner_radius=500 ,width=10 ,height=10, command=self.call_threaded_cam)  # Connect/disconnect button 
-        # self.cam_disconnect_button.place(x=50, y=70) #camera button 
 
         self.empty_cam_frame = ct.CTkFrame(master = self.right_frame , fg_color="black", width= 800 ,height =450)
         self.empty_cam_frame.place(x=125 ,y=70)
@@ -265,12 +273,19 @@ class main_gui :
 
         
     def stop_camera(self):
-    # You need to set a flag to stop the camera loop
-        # # self.is_detection_running = False
+        self.cam_disconnect_button.destroy()
 
-        # # Release the camera
-        pass
-        # # self.cap.release()
+        self.cam_connect_button = ct.CTkButton(master=self.right_frame, image=self.conn_cam_img, text="", fg_color="red", hover_color="green", corner_radius=500, width=10, height=10, command=self.call_threaded_cam)
+        self.cam_connect_button.place(x=50, y=20)
+
+        self.empty_cam_frame = ct.CTkFrame(master=self.right_frame, fg_color="black", width=800, height=450)
+        self.empty_cam_frame.place(x=125, y=70)
+
+        self.cam_status = ct.CTkLabel(master=self.empty_cam_frame, text="Camera not connected !", font=("", 18, "bold"))
+        self.cam_status.place(x=300, y=200)
+
+        print("called stop camera")
+        self.is_camera_connect_running = False
 
         # # Destroy the video view widget or update it as needed
         # self.video_view.configure(image=None)
@@ -290,65 +305,70 @@ class main_gui :
         self.is_detection_running = False
 
     def call_threaded_cam(self):
-        # self.cam_connect_button.destroy
-        # self.cam_disconnect_button = ct.CTkButton(master = self.right_frame, image= self.dis_cam_img, text="", fg_color="red",hover_color="green", corner_radius=500 ,width=10 ,height=10, command=self.stop_camera)  # Connect/disconnect button 
-        # self.cam_disconnect_button.place(x=150, y=20)
-        
-        self.c1= threading.Thread(target=self.camera_connect())
+        self.cam_connect_button.destroy()
+        self.cam_disconnect_button = ct.CTkButton(master=self.right_frame, image=self.dis_cam_img, text="", fg_color="red", hover_color="green", corner_radius=500, width=10, height=10, command=self.stop_camera)
+        self.cam_disconnect_button.place(x=50, y=20)
+
+        self.is_camera_connect_running = True
+        self.c1 = threading.Thread(target=self.camera_connect)
         self.c1.start()
-        # self.c1.daemon =True
-        self.c1.join()
+
     def camera_connect(self):
+        if self.is_camera_connect_running:
+            
             self.cam_label.destroy()
             
             self.success, self.img = self.cap.read()
             result = self.model(self.img, stream=True)
             self.empty_cam_frame.destroy()
             self.cam_status.destroy()
+            time.sleep(0.01)
 
             if self.is_detection_running:
                 for r in result:
-                        boxes = r.boxes
-                        for box in boxes:                                                           
-                            x1, y1, x2, y2 = box.xyxy[0]
-                            x1, y1, x2, y2 = int(x1), int(y1), int(x2), int(y2)
+                    boxes = r.boxes
+                    for box in boxes:                                                           
+                        x1, y1, x2, y2 = box.xyxy[0]
+                        x1, y1, x2, y2 = int(x1), int(y1), int(x2), int(y2)
 
-                            w, h = x2 - x1, y2 - y1
+                        w, h = x2 - x1, y2 - y1
 
-
-                            conf = math.ceil((box.conf[0] * 100)) / 100
-                            cls = int(box.cls[0])
+                        conf = math.ceil((box.conf[0] * 100)) / 100
+                        cls = int(box.cls[0])
+                        self.label = f'{conf} {self.classes[cls]}'
+                        
+                        if self.yolo_detect_object.get() == "All":
                             self.label = f'{conf} {self.classes[cls]}'
-                            # print(label)
-                            if self.yolo_detect_object.get() == "All":
-                                    self.label = f'{conf} {self.classes[cls]}'
-                                    cvzone.cornerRect(self.img, (x1, y1, w, h))
-                                    cvzone.putTextRect(self.img, self.label, (max(0, x1), max(0, y1)))
+                            cvzone.cornerRect(self.img, (x1, y1, w, h))
+                            cvzone.putTextRect(self.img, self.label, (max(0, x1), max(0, y1)))
 
-                            elif(self.classes[cls] == self.yolo_detect_object.get()):
-                                if self.classes[cls] == self.yolo_detect_object.get():
-                                    self.label = f'{conf} {self.classes[cls]}'
-                                    cvzone.putTextRect(self.img, self.label, (max(0, x1), max(0, y1)))
-            
+                        elif(self.classes[cls] == self.yolo_detect_object.get()):
+                            if self.classes[cls] == self.yolo_detect_object.get():
+                                self.label = f'{conf} {self.classes[cls]}'
+                                cvzone.putTextRect(self.img, self.label, (max(0, x1), max(0, y1)))
+            else:
+                self.video_view = ct.CTkLabel(self.right_frame, text="")
+                self.video_view.place(x=125, y=100)
 
-                    
+            new_width = 900  # Adjust the width as needed
+            aspect_ratio = self.img.shape[1] / self.img.shape[0]
+            new_height = int(new_width / aspect_ratio)
+            resized_img = cv2.resize(self.img, (new_width, new_height))
+            rgb_img = cv2.cvtColor(resized_img, cv2.COLOR_BGR2RGB)
+            tk_img = Image.fromarray(rgb_img)
 
-                new_width = 900  # Adjust the width as needed
-                aspect_ratio = self.img.shape[1] / self.img.shape[0]
-                new_height = int(new_width / aspect_ratio)
-                self.img = cv2.resize(self.img, (new_width, new_height))
-                self.img = cv2.cvtColor(self.img, cv2.COLOR_BGR2RGB)
-                self.img = Image.fromarray(self.img)
-                self.img = ImageTk.PhotoImage(self.img)
-                self.video_view.configure(image=self.img)
-                self.video_view.image = self.img
-            
-                # print(class_counts)
-                # if self.mail_status:
-                #     self.call_mail()
-                self.root.after(10, self.camera_connect)
-              # Print the counts of each class
+            # Check if self.img_tk already exists, if not, create it
+            if not hasattr(self, 'img_tk'):
+                self.img_tk = ImageTk.PhotoImage(tk_img)
+            else:
+                # If it exists, update its data
+                self.img_tk.paste(tk_img)
 
+            self.video_view.configure(image=self.img_tk)
+            self.video_view.image = self.img_tk
+            # Schedule the next call to camera_connect after 10 milliseconds
+            self.root.update()
+            self.root.after(10, self.camera_connect)
 
         
 
@@ -364,11 +384,11 @@ class main_gui :
 
 
     def pixshawk_connect(self):
-        try:
-            self.drone_controller = DroneController()
-
-            print("connected")
-            if self.drone_controller:
+        
+        self.drone_controller = DroneController(self.com_port.get())
+        try: 
+            if self.drone_controller.connected:
+                print("connected")
                 self.connect_button.destroy()
                 self.disconnect_button = ct.CTkButton(master = self.top_frame, image= self.connect_button_img, text="", fg_color="green",hover_color="red", corner_radius=500 ,width=10 ,height=10, command=self.pixshawk_disconnect)  #main left frame 
                 self.disconnect_button.place(x=1450 , y=8)
@@ -376,13 +396,14 @@ class main_gui :
                 self.update_drone_values.start()
             
         except Exception as e:
-            print("exceptio in connection of sroneee",e)
-            pass
+            print("exceptio in connection of drone",e)
+            self.error_p1.connection_error("Cloud not open the port")
+
 
             # self.connect_button.configure(hover_color="red", fg_color="green" , image= self.button_img)
 
     def pixshawk_disconnect(self):
-         if self.drone_controller:
+         if self.drone_controller.connected:
             self.drone_controller.disconnect_from_vehicle()
             print("disconnect")
             self.disconnect_button.destroy()
@@ -390,17 +411,17 @@ class main_gui :
             self.connect_button.place(x=1450 , y=8)
 
     def pixshawk_servo(self):
-        if self.drone_controller:
+        if self.drone_controller.connected:
             self.drone_controller.drop_package()
 
     def pixshawk_autoland(self):
-        if self.drone_controller:
+        if self.drone_controller.connected:
             self.drone_controller.set_mode()
 
     def pixshawk_arm(self):
         
         try:
-            if self.drone_controller:
+            if self.drone_controller.connected:
                 self.drone_controller.arming()
         except Exception as e:
             print(e)
@@ -410,7 +431,7 @@ class main_gui :
         pass
 
     def pixshawk_get_info(self):
-        if self.drone_controller:
+        if self.drone_controller.connected:
             self.drone_info = self.drone_controller.print_vehicle_info()
             self.altitude.configure(text=round(self.drone_info[0], 2))
             self.ground_speed.configure(text=round(self.drone_info[1], 2))
@@ -441,8 +462,9 @@ class main_gui :
                     geolocator = Nominatim(user_agent="location_extractor")
                     self.location = geolocator.reverse((self.latitude, self.longitude))
                     print(self.location)
-                    self.play_alert()
                     self.p1.error(self.name , self.latitude, self.longitude)
+                    self.alert1=  threading.Thread(target=self.play_alert())
+                    self.alert1.start()
 
                     self.my_client.reset_alert_data()
             self.altitude.after(1000, self.alert_status)
@@ -461,7 +483,7 @@ class main_gui :
 
     def play_alert(self):
         pygame.mixer.init()
-        pygame.mixer.music.load('call-to-attention-123107.mp3')
+        pygame.mixer.music.load('drone\sounds\call-to-attention-123107.mp3')
         pygame.mixer.music.play()
         engine = pyttsx3.init()
         engine.setProperty('rate', 100)  
